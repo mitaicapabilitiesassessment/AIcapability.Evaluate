@@ -531,7 +531,7 @@ function renderResult() {
         if (bonusScore >= 18) subRank = '⭐ AI Visionary';
         else if (bonusScore >= 12) subRank = '🏆 AI Strategist';
         else subRank = '🥇 AI Champion';
-        subRankHtml = `<p style="margin-top: 0.5rem; font-size: 1.1rem; color: #FFD700;">${subRank}</p>`;
+        subRankHtml = `<div class="sub-rank-badge">${subRank}</div>`;
     }
     
     if (dom.progressBar) dom.progressBar.style.width = `100%`;
@@ -590,15 +590,29 @@ function renderResult() {
 
 async function submitToSheets() {
     const totalScore = calculateScore();
-    const level = CONFIG.LEVELS.find(l => totalScore >= l.min && totalScore <= l.max)?.name || 'N/A';
+    const coreScore = calculateCoreScore();
+    const bonusScore = calculateBonusScore();
+    const level = CONFIG.LEVELS.find(l => totalScore >= l.min && totalScore <= l.max);
+    const levelName = level ? level.name : 'N/A';
     
+    // Tính toán Sub-rank tương tự như trong renderResult
+    let subRank = '';
+    if (levelName === 'AI Leader') {
+        if (bonusScore >= 18) subRank = 'AI Visionary';
+        else if (bonusScore >= 12) subRank = 'AI Strategist';
+        else subRank = 'AI Champion';
+    }
+
     const data = {
         timestamp: new Date().toISOString(),
         name: state.user.name,
         email: state.user.email,
         position: state.user.position || 'N/A',
         score: totalScore,
-        level: level
+        coreScore: coreScore,
+        bonusScore: bonusScore,
+        level: levelName,
+        subRank: subRank
     };
 
     QUESTIONS.forEach(q => {
